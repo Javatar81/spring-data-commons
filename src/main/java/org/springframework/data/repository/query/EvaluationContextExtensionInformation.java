@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.repository.query.EvaluationContextExtensionInformation.ExtensionTypeInformation.PublicMethodAndFieldFilter;
@@ -37,6 +36,8 @@ import org.springframework.data.repository.query.spi.EvaluationContextExtension;
 import org.springframework.data.repository.query.spi.Function;
 import org.springframework.data.util.Streamable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldFilter;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -235,8 +236,7 @@ class EvaluationContextExtensionInformation {
 
 			}, PublicMethodAndFieldFilter.NON_STATIC);
 
-			ReflectionUtils.doWithFields(type, RootObjectInformation.this.fields::add,
-					PublicMethodAndFieldFilter.NON_STATIC);
+			ReflectionUtils.doWithFields(type, RootObjectInformation.this.fields::add, PublicMethodAndFieldFilter.NON_STATIC);
 		}
 
 		/**
@@ -245,14 +245,17 @@ class EvaluationContextExtensionInformation {
 		 * @param target can be {@literal null}.
 		 * @return the methods
 		 */
-		public Map<String, Function> getFunctions(Optional<Object> target) {
+		public MultiValueMap<String, Function> getFunctions(Optional<Object> target) {
 
-			return target.map(it -> methods.stream()//
-					.collect(Collectors.toMap(//
-							Method::getName, //
-							method -> new Function(method, it), //
-							(left, right) -> right)))
-					.orElseGet(Collections::emptyMap);
+			return target.map( //
+					it -> methods.stream() //
+							.collect( //
+									new MultiValueMapCollector<>( //
+											Method::getName, //
+											m -> new Function(m, it) //
+									))) //
+					.orElseGet(() -> CollectionUtils.toMultiValueMap(Collections.emptyMap()));
+
 		}
 
 		/**
