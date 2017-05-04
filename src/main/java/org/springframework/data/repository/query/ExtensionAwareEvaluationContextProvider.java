@@ -51,6 +51,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -388,7 +390,7 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 
 		private final EvaluationContextExtension extension;
 
-		private final Map<String, Function> functions;
+		private final MultiValueMap<String, Function> functions;
 		private final Map<String, Object> properties;
 
 		/**
@@ -408,10 +410,10 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 			ExtensionTypeInformation extensionTypeInformation = information.getExtensionTypeInformation();
 			RootObjectInformation rootObjectInformation = information.getRootObjectInformation(target);
 
-			this.functions = new HashMap<>();
-			this.functions.putAll(extensionTypeInformation.getFunctions());
+			this.functions = CollectionUtils.toMultiValueMap(new HashMap<>());
+			this.functions.setAll(extensionTypeInformation.getFunctions());
 			this.functions.putAll(rootObjectInformation.getFunctions(target));
-			this.functions.putAll(extension.getFunctions());
+			this.functions.setAll(extension.getFunctions()); // might this overwrite stuff?
 
 			this.properties = new HashMap<>();
 			this.properties.putAll(extensionTypeInformation.getProperties());
@@ -435,7 +437,7 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 		 * 
 		 * @return
 		 */
-		public Map<String, Function> getFunctions() {
+		public MultiValueMap<String, Function> getFunctions() {
 			return this.functions;
 		}
 
