@@ -321,7 +321,9 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 
 			return adapter.getFunctions().entrySet().stream()//
 					.filter(entry -> entry.getKey().equals(name))//
-					.findFirst().map(Entry::getValue).map(FunctionMethodExecutor::new);
+					.findFirst().map(Entry::getValue)
+					.map(m -> m.get(0)) // TODO: implement usefull strategy to pick the right one
+					.map(FunctionMethodExecutor::new);
 		}
 
 		/**
