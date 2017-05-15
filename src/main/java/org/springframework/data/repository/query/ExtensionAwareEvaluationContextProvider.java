@@ -410,9 +410,10 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 			RootObjectInformation rootObjectInformation = information.getRootObjectInformation(target);
 
 			this.functions = CollectionUtils.toMultiValueMap(new HashMap<>());
-			this.functions.setAll(extensionTypeInformation.getFunctions());
-			this.functions.putAll(rootObjectInformation.getFunctions(target));
-			this.functions.setAll(extension.getFunctions()); // might this overwrite stuff?
+
+			extensionTypeInformation.getFunctions().forEach(functions::add);
+			rootObjectInformation.getFunctions(target).forEach(functions::addAll);
+			extension.getFunctions().forEach(functions::add);
 
 			this.properties = new HashMap<>();
 			this.properties.putAll(extensionTypeInformation.getProperties());
