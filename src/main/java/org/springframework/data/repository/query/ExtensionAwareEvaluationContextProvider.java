@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeansException;
@@ -319,9 +320,11 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 				List<TypeDescriptor> argumentTypes) {
 
 			return adapter.getFunctions().getOrDefault(name, Collections.emptyList()).stream() //
-					.findFirst() // TODO: implement useful strategy to pick the rightone
+					.filter(f -> f.supports(argumentTypes)) //
+					.findFirst() //
 					.map(FunctionMethodExecutor::new);
 		}
+
 
 		/**
 		 * Looks up the property value for the property of the given name from the given extension. Takes care of resolving
