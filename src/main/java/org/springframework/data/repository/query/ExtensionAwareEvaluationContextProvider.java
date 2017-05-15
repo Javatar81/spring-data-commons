@@ -62,6 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Darimont
  * @author Oliver Gierke
  * @author Christoph Strobl
+ * @author Jens Schauder
  * @since 1.9
  */
 public class ExtensionAwareEvaluationContextProvider implements EvaluationContextProvider, ApplicationContextAware {

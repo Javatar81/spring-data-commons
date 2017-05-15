@@ -44,7 +44,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * Unit tests {@link ExtensionAwareEvaluationContextProvider}.
  * 
  * @author Oliver Gierke
- * @author Thomas Darimont.
+ * @author Thomas Darimont
+ * @author Jens Schauder
  */
 public class ExtensionAwareEvaluationContextProviderUnitTests {
 
@@ -219,6 +220,24 @@ public class ExtensionAwareEvaluationContextProviderUnitTests {
 		assertThat(counter.get()).isEqualTo(2);
 	}
 
+	@Test // DATACMNS-1026
+	public void overloadedMethodsGetResolved() throws Exception {
+
+		provider = new ExtensionAwareEvaluationContextProvider(
+				Collections.singletonList(new DummyExtension("_first", "first"){
+					@Override
+					public Object getRootObject() {
+						return new RootWithOverloads();
+					}
+				}));
+
+		assertThat(evaluateExpression("method()")).isEqualTo("zero");
+		assertThat(evaluateExpression("method(23)")).isEqualTo("single-int");
+		assertThat(evaluateExpression("method('hello')")).isEqualTo("single-string");
+		assertThat(evaluateExpression("method('one', 'two')")).isEqualTo("two");
+	}
+
+
 	@RequiredArgsConstructor
 	public static class DummyExtension extends EvaluationContextExtensionSupport {
 
@@ -310,6 +329,25 @@ public class ExtensionAwareEvaluationContextProviderUnitTests {
 
 		public String rootObjectInstanceMethod2() {
 			return "rootObjectInstanceMethod2";
+		}
+	}
+
+	public static class RootWithOverloads {
+
+		public String method() {
+			return "zero";
+		}
+
+		public String method(String s) {
+			return "single-string";
+		}
+
+		public String method(int i) {
+			return "single-int";
+		}
+
+		public String method(String s1, String s2) {
+			return "two";
 		}
 	}
 }
