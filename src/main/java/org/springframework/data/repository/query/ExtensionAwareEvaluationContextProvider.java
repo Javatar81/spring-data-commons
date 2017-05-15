@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -319,10 +318,8 @@ public class ExtensionAwareEvaluationContextProvider implements EvaluationContex
 		private Optional<MethodExecutor> getMethodExecutor(EvaluationContextExtensionAdapter adapter, String name,
 				List<TypeDescriptor> argumentTypes) {
 
-			return adapter.getFunctions().entrySet().stream()//
-					.filter(entry -> entry.getKey().equals(name))//
-					.findFirst().map(Entry::getValue)
-					.map(m -> m.get(0)) // TODO: implement usefull strategy to pick the right one
+			return adapter.getFunctions().getOrDefault(name, Collections.emptyList()).stream() //
+					.findFirst() // TODO: implement useful strategy to pick the rightone
 					.map(FunctionMethodExecutor::new);
 		}
 
